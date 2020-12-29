@@ -1,6 +1,5 @@
 package com.study.oauth2.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bootstrap.encrypt.KeyProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +11,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
@@ -30,13 +31,13 @@ import java.security.KeyPair;
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
 
-    @Autowired
+    @Resource
     private DataSource dataSource;
-    @Autowired
+    @Resource
     private UserDetailsService userDetailsService;
-    @Autowired
+    @Resource
     private AuthenticationManager authenticationManager;
-    @Autowired
+    @Resource
     private PasswordEncoder passwordEncoder;
 
 
@@ -54,9 +55,17 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .checkTokenAccess("isAuthenticated()");
     }
 
+    //将客户端信息存储到数据库
+    @Bean
+    public ClientDetailsService clientDetailsService(DataSource dataSource) {
+        ClientDetailsService clientDetailsService = new JdbcClientDetailsService(dataSource);
+        ((JdbcClientDetailsService) clientDetailsService).setPasswordEncoder(passwordEncoder);
+        return clientDetailsService;
+    }
+
     /**
      * 用户中心
-     * 校验 申购应用是否 oauth_client_details 是否有此用户
+     * 校验 应用是否 oauth_client_details 是否有此用户
      * 方式:   数据库(持久化保存用户信息)
      *
      * @param clients
@@ -67,14 +76,13 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         clients.jdbc(dataSource);
     }
 
-    /**
-     *encrypt:
-     key-store:
-     alias: changgou  #别名
-     location: changgou.jks  #KeyStore 证书库名称
-     password: changgou   #证书库密码
-     secret: changgou   #秘钥
-     */
+    /*auth:
+    ttl: 1200  #token存储到redis的过期时间
+    clientId: study    #客户端ID
+    clientSecret: study    #客户端秘钥
+    cookieDomain: .study.com    #Cookie保存对应的域名
+    cookieMaxAge: -1            #Cookie过期时间，-1表示浏览器关闭则销毁
+    */
     @Resource(name = "keyProp")
     private KeyProperties keyProperties;
 

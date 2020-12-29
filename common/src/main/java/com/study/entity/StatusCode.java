@@ -1,4 +1,4 @@
-package com.changgou.entity;
+package com.study.entity;
 
 /**
  * 返回码

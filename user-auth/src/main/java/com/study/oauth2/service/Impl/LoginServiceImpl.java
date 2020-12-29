@@ -40,9 +40,9 @@ public class LoginServiceImpl implements LoginService {
     /**
      * auth:
      * ttl: 1200  #token存储到redis的过期时间
-     * clientId: changgou	#客户端ID
-     * clientSecret: changgou	#客户端秘钥
-     * cookieDomain: .changgou.com	#Cookie保存对应的域名
+     * clientId: study	#客户端ID
+     * clientSecret: studys	#客户端秘钥
+     * cookieDomain: .study.com	#Cookie保存对应的域名
      * cookieMaxAge: -1			#Cookie过期时间，-1表示浏览器关闭则销毁
      */
     @Value("${auth.clientId}")

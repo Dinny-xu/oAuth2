@@ -1,7 +1,7 @@
 package com.study.user.controller;
 
-import com.changgou.entity.Result;
-import com.changgou.entity.StatusCode;
+import com.study.entity.Result;
+import com.study.entity.StatusCode;
 import com.study.user.pojo.User;
 import com.study.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
