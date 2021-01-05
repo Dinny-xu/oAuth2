@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @program: CG
+ * @program:
  * @description: 登录实现类
  * @author: Xu·yan
  * @create: 2020-12-28 10:31
