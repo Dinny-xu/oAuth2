@@ -28,7 +28,7 @@ public class UserController {
     @GetMapping
     public Result findAll(){
         List<User> userList = userService.findAll();
-        return new Result(true, StatusCode.OK,"查询成功",userList) ;
+        return Result.ok(userList);
     }
 
 }

@@ -1,8 +1,13 @@
 package com.study.oauth2.controller;
 
+import com.study.entity.Result;
+import com.study.oauth2.dao.UserMapper;
 import com.study.oauth2.pojo.res.AuthToken;
+import com.study.oauth2.pojo.res.User;
 import com.study.oauth2.service.LoginService;
 import com.study.oauth2.util.CookieUtil;
+import com.study.oauth2.util.TokenDecryptUtil;
+import com.study.util.CommonUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -11,11 +16,17 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint;
+import org.springframework.security.oauth2.provider.token.ConsumerTokenServices;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +38,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @program:
@@ -40,18 +52,35 @@ public class LoginController {
 
     @Resource
     private LoginService loginService;
+    @Autowired
+    private CheckTokenEndpoint checkTokenEndpoint;
+    @Autowired
+    private ConsumerTokenServices consumerTokenServices;
+    @Autowired
+    private UserMapper userMapper;
 
     @Value("${auth.cookieMaxAge}")
     private String cookieMaxAge;
     @Value("${auth.cookieDomain}")
     private String cookieDomain;
 
+    /**
+    * @description 页面展示
+    * @author Xu·yan
+    * @date 2021/1/13 11:09 上午
+    */
     @GetMapping
     public String login(String ReturnUrl, Model model) {
         model.addAttribute("ReturnUrl", ReturnUrl);
         return "index";
     }
 
+
+    /**
+    * @description 登录
+    * @author Xu·yan
+    * @date 2021/1/13 11:09 上午
+    */
     @PostMapping
     public String login(String userName, String password, String ReturnUrl) {
         // 返回值 令牌
@@ -101,7 +130,48 @@ public class LoginController {
         //是否选择保护对象
         cookie.setHttpOnly(false);*/
 
-        String s = "redirect:" + "http://192.168.10.166";
+//        String s = "redirect:" + "http://192.168.10.166";
+        String s = "redirect:" + "http://www.baidu.com";
         return s;
+    }
+
+
+
+    /**
+    * @description oAuth2 登出
+    * @author Xu·yan
+    * @date 2021/1/13 11:11 上午
+    */
+    @DeleteMapping(value = "/logout")
+    public Result<Boolean> removeToken(String accessToken) {
+        try {
+            checkTokenEndpoint.checkToken(accessToken);
+            boolean revokeTokenFlag = consumerTokenServices.revokeToken(accessToken);
+            return Result.ok(revokeTokenFlag, "退出成功");
+        } catch (InvalidTokenException e) {
+            e.printStackTrace();
+            return Result.error("token已失效或已过期");
+        }
+    }
+
+
+    /**
+    * @description 通过token 获取用户信息
+    * @author Xu·yan
+    * @date 2021/1/13 11:17 上午
+    */
+    @GetMapping("/getUserInfo")
+    public Result getUserInfo(String accessToken) {
+        try {
+            checkTokenEndpoint.checkToken(accessToken);
+            User user = userMapper.selectByPrimaryKey(TokenDecryptUtil.getUserId(accessToken));
+            if (Objects.isNull(user)) {
+                return Result.error("用户信息不存在");
+            }
+            return Result.ok(CommonUtils.map(user, User.class));
+        } catch (InvalidTokenException e) {
+            e.printStackTrace();
+            return Result.error("token已失效或已过期");
+        }
     }
 }
