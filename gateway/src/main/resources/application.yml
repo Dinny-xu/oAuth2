@@ -1,0 +1,37 @@
+server:
+  port: 9102
+spring:
+  application:
+    name: webgateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]': # 匹配所有请求
+            allowedOrigins: "*" #跨域处理 允许所有的域
+            allowedMethods: # 支持的方法
+              - GET
+              - POST
+              - PUT
+              - DELETE
+      routes:
+        - id: changgou_web_order   #微服务  购物车管理 订单管理  支付管理
+          uri: lb://webOrder
+          predicates:
+            - Path=/wo/**   #路径前缀随便起 不重复就好
+          filters:
+            - StripPrefix= 1
+        - id: changgou_service_user   #用户微服务
+          uri: lb://user
+          predicates:
+            - Path=/user/**   #路径前缀随便起 不重复就好
+          filters:
+            - StripPrefix= 1
+  redis:
+    host: 127.0.0.1
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:6868/eureka
+  instance:
+    prefer-ip-address: true
