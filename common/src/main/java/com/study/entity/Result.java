@@ -1,66 +1,67 @@
 package com.study.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 
 /**
- * 返回结果实体类
- */
-public class Result implements Serializable{
+* @description 通用返回接口
+* @author Xu·yan
+* @date 2021/1/13 10:23 上午
+*/
+@Getter
+@Setter
+public class Result<T> implements Serializable {
 
-    private boolean flag;//是否成功
-    private Integer code;//返回码
-    private String message;//返回消息
+    private static final long serialVersionUID = 687732856090568050L;
+    /**
+     * 返回代码，200为成功
+     */
+    private String code;
+    /**
+     * 执行成功或失败
+     */
+    private Boolean success;
+    /**
+     * 返回的消息
+     */
+    private String msg;
+    /**
+     * 返回的数据
+     */
+    private T data;
 
-    private Object data;//返回数据
-
-    public Result(boolean flag, Integer code, String message, Object data) {
-        this.flag = flag;
+    public Result(String code, String msg, Boolean success) {
         this.code = code;
-        this.message = message;
-        this.data = data;
+        this.msg = msg;
+        this.success = success;
     }
 
-    public Result(boolean flag, Integer code, String message) {
-        this.flag = flag;
-        this.code = code;
-        this.message = message;
+    public static Result ok() {
+        return new Result(ResultEnum.OK.getCode(), ResultEnum.OK.getMsg(), true);
     }
 
-    public Result() {
-        this.flag = true;
-        this.code = StatusCode.OK;
-        this.message = "操作成功";
+    public static <T> Result<T> ok(T data) {
+        return ok(data, ResultEnum.OK.getMsg());
     }
 
-    public boolean isFlag() {
-        return flag;
+    public static <T> Result<T> ok(T data, String msg) {
+        Result<T> result = new Result<>(ResultEnum.OK.getCode(), msg, true);
+        result.setData(data);
+        return result;
     }
 
-    public void setFlag(boolean flag) {
-        this.flag = flag;
+    public static Result error() {
+        return new Result(ResultEnum.ERROR.getCode(), ResultEnum.ERROR.getMsg(), false);
     }
 
-    public Integer getCode() {
-        return code;
+    public static Result error(String msg) {
+        return new Result(ResultEnum.ERROR.getCode(), msg, false);
     }
 
-    public void setCode(Integer code) {
-        this.code = code;
+    public static Result error(String code, String msg) {
+        return new Result(code, msg, false);
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
-    }
 }

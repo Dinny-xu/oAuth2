@@ -10,10 +10,9 @@
 
     <artifactId>common</artifactId>
 
-<!--    <properties>-->
-<!--        <java.version>1.8</java.version>-->
-<!--        <spring.cloud.version>Hoxton.SR4</spring.cloud.version>-->
-<!--    </properties>-->
+    <properties>
+        <hutool.version>5.1.0</hutool.version>
+    </properties>
 
     <dependencies>
         <!--web起步依赖-->
@@ -78,6 +77,12 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-context</artifactId>
+        </dependency>
+<!--        hutool 工具包-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
         </dependency>
     </dependencies>
 
